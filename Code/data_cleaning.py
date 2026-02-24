@@ -83,10 +83,10 @@ class DataCleaning:
         )
 
         df_pivot.columns = [
-            f"{col[1].lower().replace(' ', '_')}"
-            if col[0] == "value"
-            else "confidence_score"
-            for col in df_pivot.columns
+             f"{col[1].lower().replace(' ', '_')}"
+                if col[0] == "value"
+                else f"{col[1].lower().replace(' ', '_')}_confidence_score"
+                for col in df_pivot.columns
         ]
         
         df_pivot = df_pivot.reset_index()
@@ -100,18 +100,23 @@ class DataCleaning:
         return df_pivot
 
     def handel_missing_value(self, df):
-        df = df.dropna(subset=['production_tons'])
+        df = df.dropna(subset=['production_tons']).copy()
+
         feature_cols = [
             "area_harvested_ha",
             "yield_kg_per_ha",
-            "confidence_score"
+            "area_harvested_ha_confidence_score",
+            "yield_kg_per_ha_confidence_score",
+            "production_tons_confidence_score"
         ]
 
         for col in feature_cols:
-            df[col] = df[col].fillna(df[col].median())
+            if col in df.columns:
+                df.loc[:, col] = df[col].fillna(df[col].median())
 
         return df
 
+    
     def save_dataset(self, df):
         df.to_csv(self.output_path, index=False)
 
